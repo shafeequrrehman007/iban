@@ -1,14 +1,14 @@
-# Use Node.js v14
-FROM node:22
+# Use Python v3.9
+FROM python:3.9
 
 # Create app directory
 WORKDIR /usr/src/app
 
 # Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-COPY package*.json ./
+# Copy requirements.txt to ensure dependencies are installed
+COPY requirements.txt ./
 
-RUN npm install
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Bundle app source
 COPY . .
@@ -16,4 +16,4 @@ COPY . .
 # Expose the port
 EXPOSE 3000
 
-CMD [ "node", "iban.js" ]
+CMD [ "python", "main.py" ]
