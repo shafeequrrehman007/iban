@@ -17,8 +17,10 @@ base_url = "https://ibanapi.com"
 
 # Proxy configuration (optional)
 proxies = {
-    "http": "socks5://tcnppbwe-rotate:m27wwonyzdza@p.webshare.io:80/",
-    "https": "socks5://tcnppbwe-rotate:m27wwonyzdza@p.webshare.io:80/"
+    "http": "http://tcnppbwe-rotate:m27wwonyzdza@p.webshare.io:80/",
+    "http": "http://onosguhu-rotate:bua33b6mplf1@p.webshare.io:80/",
+    "https": "http://onosguhu-rotate:bua33b6mplf1@p.webshare.io:80/",
+    "https": "http://tcnppbwe-rotate:m27wwonyzdza@p.webshare.io:80/"
 }
 
 # Function to retrieve a random IBAN from a file
