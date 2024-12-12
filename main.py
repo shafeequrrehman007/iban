@@ -5,7 +5,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
 # Bot token
-TOKEN = '6685826015:AAFet4wAr4r_Jt5U0aYcxe6fmKL1o_jWqGM'
+TOKEN = '6685826015:AAF__BVFEnNiruZFzplU_g6RU6kvbhd4bDM'
 
 # File paths for IBANs
 iban_file_path_uk = 'iban.txt'
