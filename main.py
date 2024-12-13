@@ -11,7 +11,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 keep_alive()
 # Bot token
 TOKEN = Bot(token=os.environ.get('token'))
-dp = Dispatcher(bot)
+dp = Dispatcher(TOKEN)
 # TOKEN = '6685826015:AAF__BVFEnNiruZFzplU_g6RU6kvbhd4bDM'
 
 # File paths for IBANs
