@@ -10,7 +10,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 keep_alive()
 # Bot token
-bot = Bot(token=os.environ.get('TOKEN'))
+TOKEN = Bot(token=os.environ.get('token'))
 dp = Dispatcher(bot)
 # TOKEN = '6685826015:AAF__BVFEnNiruZFzplU_g6RU6kvbhd4bDM'
 
