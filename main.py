@@ -10,9 +10,9 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 keep_alive()
 # Bot token
-TOKEN = Bot(token=os.environ.get('token'))
-dp = Dispatcher(TOKEN)
-# TOKEN = '6685826015:AAF__BVFEnNiruZFzplU_g6RU6kvbhd4bDM'
+#TOKEN = Bot(token=os.environ.get('token'))
+#dp = Dispatcher(TOKEN)
+TOKEN = '6685826015:AAF__BVFEnNiruZFzplU_g6RU6kvbhd4bDM'
 
 # File paths for IBANs
 iban_file_path_uk = 'iban.txt'
