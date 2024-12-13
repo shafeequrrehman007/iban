@@ -12,7 +12,7 @@ keep_alive()
 # Bot token
 #TOKEN = Bot(token=os.environ.get('token'))
 #dp = Dispatcher(TOKEN)
-TOKEN = '6685826015:AAF__BVFEnNiruZFzplU_g6RU6kvbhd4bDM'
+TOKEN = '6685826015:AAFb-AYP5ksaAo_PT_4KDpUVDjX1D_3NDlw'
 
 # File paths for IBANs
 iban_file_path_uk = 'iban.txt'
