@@ -1,11 +1,18 @@
+
+from aiogram import Bot, Dispatcher, executor, types
+import os
+from keep_alive import keep_alive
+
 import random
 import requests
 from bs4 import BeautifulSoup
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
-
+keep_alive()
 # Bot token
-TOKEN = '6685826015:AAF__BVFEnNiruZFzplU_g6RU6kvbhd4bDM'
+bot = Bot(token=os.environ.get('TOKEN'))
+dp = Dispatcher(bot)
+# TOKEN = '6685826015:AAF__BVFEnNiruZFzplU_g6RU6kvbhd4bDM'
 
 # File paths for IBANs
 iban_file_path_uk = 'iban.txt'
