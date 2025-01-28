@@ -36,7 +36,7 @@ def get_random_iban_from_file(file_path):
         with open(file_path, 'r') as file:
             ibans = file.readlines()
         random_iban = random.choice(ibans).strip()
-        return f"Valid IBAN: {random_iban}"
+        return f"<b>Valid IBAN:</b> <code>{random_iban}</code>"
     except FileNotFoundError:
         return 'IBAN file not found.'
 
