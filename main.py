@@ -36,7 +36,7 @@ def get_random_iban_from_file(file_path):
         with open(file_path, 'r') as file:
             ibans = file.readlines()
         random_iban = random.choice(ibans).strip()
-        return f"<b>Valid IBAN:</b> <code>{random_iban}</code>"
+        return f"**Valid IBAN:** <code>{random_iban}</code>"
     except FileNotFoundError:
         return 'IBAN file not found.'
 
@@ -158,15 +158,15 @@ async def check_iban(update: Update, context: CallbackContext):
         if result:
             if result["status"] == "success":
                 response_message = (
-                    f"<b>IBAN Validation Successful! ✅</b>\n"
-                    f"<b>IBAN: </b>{result['iban']}\n"
-                    f"<b>Message: </b>{result['message']}\n"
-                    f"<b>Bank Account: </b>{result['bank_account']}\n"
-                    f"<b>Country Code: </b>{result['country_code']}\n"
-                    f"<b>Country Name: </b>{result['country_name']}\n"
-                    f"<b>Currency Code: </b>{result['currency_code']}\n"
-                    f"<b>Bank Name: </b>{result['bank_name']}\n"
-                    f"<b>BIC:</b> {result['bic']}"
+                    f"**IBAN Validation Successful! ✅**\n"
+                    f"**IBAN: **{result['iban']}\n"
+                    f"**Message: **{result['message']}\n"
+                    f"**Bank Account: **{result['bank_account']}\n"
+                    f"**Country Code: **{result['country_code']}\n"
+                    f"**Country Name: **{result['country_name']}\n"
+                    f"**Currency Code: **{result['currency_code']}\n"
+                    f"**Bank Name: **{result['bank_name']}\n"
+                    f"**BIC:** {result['bic']}"
                 )
             else:
                 response_message = f"❌ {result['iban']} - {result['message']}"
