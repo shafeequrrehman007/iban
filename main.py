@@ -1,4 +1,3 @@
-
 from aiogram import Bot, Dispatcher, executor, types
 import os
 from keep_alive import keep_alive
@@ -8,11 +7,11 @@ import requests
 from bs4 import BeautifulSoup
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
+
 keep_alive()
+
 # Bot token
-#TOKEN = Bot(token=os.environ.get('token'))
-#dp = Dispatcher(TOKEN)
-TOKEN = '6685826015:AAFb-AYP5ksaAo_PT_4KDpUVDjX1D_3NDlw'
+TOKEN = '6685826015:AAFb-AYP5ksaAo_PT_4KDpUVDjX1D_3NDlw'  # Replace with your actual token
 
 # File paths for IBANs
 iban_file_path_uk = 'iban.txt'
@@ -36,9 +35,9 @@ def get_random_iban_from_file(file_path):
         with open(file_path, 'r') as file:
             ibans = file.readlines()
         random_iban = random.choice(ibans).strip()
-        return f"Valid IBAN: {random_iban}"
+        return random_iban  # Return only the IBAN, not the "Valid IBAN: " prefix
     except FileNotFoundError:
-        return 'IBAN file not found.'
+        return None  # Return None if file not found
 
 # Function to validate IBAN using the external API
 def validate_iban(iban):
@@ -114,37 +113,72 @@ def validate_iban(iban):
 
     return result
 
+# Function to format the IBAN validation response
+def format_validation_response(result):
+    if result["status"] == "success":
+        response_message = (
+            f"IBAN Validation Successful! ✅\n"
+            f"IBAN: {result['iban']}\n"
+            f"Message: {result['message']}\n"
+            f"Bank Account: {result['bank_account']}\n"
+            f"Country Code: {result['country_code']}\n"
+            f"Country Name: {result['country_name']}\n"
+            f"Currency Code: {result['currency_code']}\n"
+            f"Bank Name: {result['bank_name']}\n"
+            f"BIC: {result['bic']}"
+        )
+    else:
+        response_message = f"❌ {result['iban']} - {result['message']}"
+    return response_message
+
 # Start command handler
 async def start(update: Update, context: CallbackContext):
     username = update.message.from_user.username
     chat_id = update.message.chat.id
-    message = f"Welcome to IBAN Generator and Validator!\nUsername: @{username}\nUser ID: {chat_id}\n\nGet IBAN or validate with commands:\n/getiban"
-    await update.message.reply_text(message)
-
-# /getiban command handler
-async def get_iban_options(update: Update, context: CallbackContext):
-    message = """
-    GB & UK IBAN : /ibanDE
-    ITALY IBAN : /ibanFR
-    FRANCE IBAN: /ibanIT
-    Validate IBAN with: .chk <iban>
-    """
+    message = f"Welcome to IBAN Generator and Validator!\nUsername: @{username}\nUser ID: {chat_id}\n\nGet IBAN and validate with commands:\n/ibanDE\n/ibanFR\n/ibanIT\n\nValidate IBAN with: .chk <iban>"
     await update.message.reply_text(message)
 
 # /ibanDE command handler
-async def get_iban_uk(update: Update, context: CallbackContext):
+async def get_and_validate_iban_uk(update: Update, context: CallbackContext):
     iban = get_random_iban_from_file(iban_file_path_uk)
-    await update.message.reply_text(iban)
+    if iban:
+        result = validate_iban(iban)
+        if result:
+            response_message = format_validation_response(result)
+            await update.message.reply_text(response_message)
+        else:
+            await update.message.reply_text("Error validating IBAN from UK file.")
+    else:
+        await update.message.reply_text("Could not retrieve IBAN from UK file.")
+
 
 # /ibanFR command handler
-async def get_iban_italy(update: Update, context: CallbackContext):
+async def get_and_validate_iban_italy(update: Update, context: CallbackContext):
     iban = get_random_iban_from_file(iban_file_path_italy)
-    await update.message.reply_text(iban)
+    if iban:
+        result = validate_iban(iban)
+        if result:
+            response_message = format_validation_response(result)
+            await update.message.reply_text(response_message)
+        else:
+            await update.message.reply_text("Error validating IBAN from Italy file.")
+    else:
+        await update.message.reply_text("Could not retrieve IBAN from Italy file.")
 
 # /ibanIT command handler
-async def get_iban_france(update: Update, context: CallbackContext):
+async def get_and_validate_iban_france(update: Update, context: CallbackContext):
     iban = get_random_iban_from_file(iban_file_path_france)
-    await update.message.reply_text(iban)
+    if iban:
+        result = validate_iban(iban)
+        if result:
+            response_message = format_validation_response(result)
+            await update.message.reply_text(response_message)
+        else:
+            await update.message.reply_text("Error validating IBAN from France file.")
+    else:
+        await update.message.reply_text("Could not retrieve IBAN from France file.")
+
+
 
 # IBAN validation handler
 async def check_iban(update: Update, context: CallbackContext):
@@ -156,23 +190,13 @@ async def check_iban(update: Update, context: CallbackContext):
         result = validate_iban(iban)
 
         if result:
-            if result["status"] == "success":
-                response_message = (
-                    f"IBAN Validation Successful! ✅\n"
-                    f"IBAN: {result['iban']}\n"
-                    f"Message: {result['message']}\n"
-                    f"Bank Account: {result['bank_account']}\n"
-                    f"Country Code: {result['country_code']}\n"
-                    f"Country Name: {result['country_name']}\n"
-                    f"Currency Code: {result['currency_code']}\n"
-                    f"Bank Name: {result['bank_name']}\n"
-                    f"BIC: {result['bic']}"
-                )
-            else:
-                response_message = f"❌ {result['iban']} - {result['message']}"
+            response_message = format_validation_response(result)
             await update.message.reply_text(response_message)
+        else:
+            await update.message.reply_text("Error validating IBAN.")
     else:
         await update.message.reply_text("Please use the `.chk` prefix followed by an IBAN (e.g., `.chk GB29NWBK60161331926819`).")
+
 
 # Main function to start the bot
 def main():
@@ -180,14 +204,14 @@ def main():
 
     # Add command handlers
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("getiban", get_iban_options))
-    application.add_handler(CommandHandler("ibanDE", get_iban_uk))
-    application.add_handler(CommandHandler("ibanFR", get_iban_italy))
-    application.add_handler(CommandHandler("ibanIT", get_iban_france))
+    application.add_handler(CommandHandler("ibanDE", get_and_validate_iban_uk))
+    application.add_handler(CommandHandler("ibanFR", get_and_validate_iban_italy))
+    application.add_handler(CommandHandler("ibanIT", get_and_validate_iban_france))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, check_iban))
 
     # Start the bot
     application.run_polling()
+
 
 if __name__ == '__main__':
     main()
