@@ -1,15 +1,21 @@
-import time
+from flask import Flask
 import threading
+import time
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Server is running!"
 
 def keep_alive():
     while True:
-        print("Keeping alive...")  # Replace this with your task
+        print("Keeping alive...")
         time.sleep(30)
 
-# Run in a separate thread
+# Start keep-alive thread
 thread = threading.Thread(target=keep_alive, daemon=True)
 thread.start()
 
-# Main program continues running
-while True:
-    time.sleep(1)  # Keep the main script running
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=False)
