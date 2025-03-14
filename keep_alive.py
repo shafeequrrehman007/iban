@@ -25,7 +25,7 @@ def ping_website():
             return response
         except Exception as e:
             print(f"Error pinging website: {e}")
-        time.sleep(1800)  # Wait for 30 minutes (1800 seconds)
+        time.sleep(18)  # Wait for 30 minutes (1800 seconds)
 
 def keep_alive():
     t1 = Thread(target=run)
