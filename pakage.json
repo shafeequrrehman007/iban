@@ -1,0 +1,28 @@
+{
+  "name": "iban-validator-bot",
+  "version": "1.0.0",
+  "description": "A Telegram bot for generating and validating IBANs.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"  // Optional: Use nodemon for automatic restarts during development
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "iban",
+    "validator",
+    "generator"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.7",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.4.5",
+    "telegraf": "^4.16.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"  // Optional: Dev dependency for automatic restarts
+  }
+}
