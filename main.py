@@ -1,14 +1,12 @@
 from aiogram import Bot, Dispatcher, executor, types
 import os
-
-
 import random
 import requests
 from bs4 import BeautifulSoup
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
-
-keep_alive()
+import keep_alive
+import logging  # Import the logging module
 
 # Bot token
 TOKEN = '6685826015:AAFb-AYP5ksaAo_PT_4KDpUVDjX1D_3NDlw'  # Replace with your actual token
@@ -17,6 +15,11 @@ TOKEN = '6685826015:AAFb-AYP5ksaAo_PT_4KDpUVDjX1D_3NDlw'  # Replace with your ac
 iban_file_path_uk = 'iban.txt'
 iban_file_path_italy = 'iban2.txt'
 iban_file_path_france = 'iban3.txt'
+
+# File to store user IDs
+user_file = 'users.txt'
+
+# keep_alive.keep_alive()  # call keep_alive *before* instantiating the bot
 
 # Base URL for IBAN validation API
 base_url = "https://ibanapi.com"
@@ -29,6 +32,13 @@ proxies = {
     "https": "http://tcnppbwe-rotate:m27wwonyzdza@p.webshare.io:80/"
 }
 
+# Configure logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+
+
 # Function to retrieve a random IBAN from a file
 def get_random_iban_from_file(file_path):
     try:
@@ -37,6 +47,7 @@ def get_random_iban_from_file(file_path):
         random_iban = random.choice(ibans).strip()
         return random_iban  # Return only the IBAN, not the "Valid IBAN: " prefix
     except FileNotFoundError:
+        logger.warning(f"IBAN file not found: {file_path}") # Log warning
         return None  # Return None if file not found
 
 # Function to validate IBAN using the external API
@@ -53,14 +64,14 @@ def validate_iban(iban):
         response = session.get(token_url, proxies=proxies)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx and 5xx)
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching CSRF token: {e}")
+        logger.error(f"Error fetching CSRF token: {e}") #Log error
         return None
 
     # Extract the CSRF token using BeautifulSoup
     soup = BeautifulSoup(response.text, "html.parser")
     csrf_token_meta = soup.find("meta", {"name": "csrf-token"})
     if not csrf_token_meta:
-        print("CSRF token not found in the response. Aborting.")
+        logger.error("CSRF token not found in the response. Aborting.") #Log error
         return None
     csrf_token = csrf_token_meta["content"]
 
@@ -81,14 +92,14 @@ def validate_iban(iban):
         response = session.post(validate_url, headers=headers, proxies=proxies)
         response.raise_for_status()  # Raise HTTPError for bad responses
     except requests.exceptions.RequestException as e:
-        print(f"Error validating IBAN: {e}")
+        logger.error(f"Error validating IBAN: {e}")  #Log error
         return None
 
     # Parse JSON response
     try:
         data = response.json()
     except ValueError:
-        print("Failed to parse JSON response. Check API response format.")
+        logger.error("Failed to parse JSON response. Check API response format.") #Log error
         return None
 
     # Process the response
@@ -131,12 +142,52 @@ def format_validation_response(result):
         response_message = f"❌ {result['iban']} - {result['message']}"
     return response_message
 
+# Function to save user ID
+async def save_user(user_id):
+    try:
+        with open(user_file, 'a+') as f:
+            f.seek(0)  # Rewind to the beginning of the file
+            if str(user_id) + '\n' not in f.readlines():
+                f.write(str(user_id) + '\n')
+                logger.info(f"Saved new user ID: {user_id}") # Log info
+                return True
+            return False
+    except Exception as e:
+        logger.error(f"Error saving user ID {user_id}: {e}") # Log error
+        return False
+
+# Function to read user IDs from file
+def get_user_ids():
+    try:
+        with open(user_file, 'r') as f:
+            return [int(line.strip()) for line in f.readlines()]
+    except FileNotFoundError:
+        logger.warning("User file not found. No users loaded.") #Log warning
+        return []
+    except Exception as e:
+        logger.error(f"Error reading user IDs: {e}") # Log error
+        return []
+
+# Function to broadcast a message
+async def broadcast(context: CallbackContext, message: str):
+    user_ids = get_user_ids()
+    for user_id in user_ids:
+        try:
+            await context.bot.send_message(chat_id=user_id, text=message)
+        except Exception as e:
+            logger.error(f"Failed to send message to user {user_id}: {e}") # Log error
+
 # Start command handler
 async def start(update: Update, context: CallbackContext):
+    user_id = update.message.from_user.id
     username = update.message.from_user.username
     chat_id = update.message.chat.id
     message = f"Welcome to IBAN Generator and Validator!\nUsername: @{username}\nUser ID: {chat_id}\n\nGet IBAN and validate with commands:\n/ibanDE\n/ibanFR\n/ibanIT\n\nValidate IBAN with: .chk <iban>"
     await update.message.reply_text(message)
+
+    # Save user ID
+    if await save_user(user_id):
+        logger.info(f"New user saved: {user_id}") # Log info
 
 # /ibanDE command handler
 async def get_and_validate_iban_uk(update: Update, context: CallbackContext):
@@ -150,7 +201,6 @@ async def get_and_validate_iban_uk(update: Update, context: CallbackContext):
             await update.message.reply_text("Error validating IBAN from UK file.")
     else:
         await update.message.reply_text("Could not retrieve IBAN from UK file.")
-
 
 # /ibanFR command handler
 async def get_and_validate_iban_italy(update: Update, context: CallbackContext):
@@ -178,8 +228,6 @@ async def get_and_validate_iban_france(update: Update, context: CallbackContext)
     else:
         await update.message.reply_text("Could not retrieve IBAN from France file.")
 
-
-
 # IBAN validation handler
 async def check_iban(update: Update, context: CallbackContext):
     message_text = update.message.text.strip()
@@ -197,9 +245,26 @@ async def check_iban(update: Update, context: CallbackContext):
     else:
         await update.message.reply_text("Please use the `.chk` prefix followed by an IBAN (e.g., `.chk GB29NWBK60161331926819`).")
 
+# /broadcast command handler (ADMIN ONLY)
+async def broadcast_command(update: Update, context: CallbackContext):
+    # Replace YOUR_ADMIN_USER_ID with the actual admin user ID
+    ADMIN_USER_ID = 123456789  # Example.  Important to change it.
+    if update.message.from_user.id == ADMIN_USER_ID:
+        message = ' '.join(context.args)  # Get the broadcast message from the command arguments
+        if message:
+            await broadcast(context, message)
+            await update.message.reply_text("Broadcast message sent!")
+        else:
+            await update.message.reply_text("Please provide a message to broadcast.")
+    else:
+        await update.message.reply_text("You are not authorized to use this command.")
 
 # Main function to start the bot
 def main():
+    # Initialize logging
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
+
     application = Application.builder().token(TOKEN).build()
 
     # Add command handlers
@@ -208,10 +273,10 @@ def main():
     application.add_handler(CommandHandler("ibanFR", get_and_validate_iban_italy))
     application.add_handler(CommandHandler("ibanIT", get_and_validate_iban_france))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, check_iban))
+    application.add_handler(CommandHandler("broadcast", broadcast_command)) # Add broadcast command
 
     # Start the bot
     application.run_polling()
-
 
 if __name__ == '__main__':
     main()
