@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
-import keep_alive
+# import keep_alive
 import logging  # Import the logging module
 
 # Bot token
