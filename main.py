@@ -9,7 +9,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 import logging  # Import the logging module
 
 # Bot token
-TOKEN = '6685826015:AAFb-AYP5ksaAo_PT_4KDpUVDjX1D_3NDlw'  # Replace with your actual token
+TOKEN = os.getenv("BOT_TOKEN")  # Replace with your actual token
 
 # File paths for IBANs
 iban_file_path_uk = 'iban.txt'
