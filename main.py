@@ -19,8 +19,8 @@ if not TOKEN:
 # File paths for IBANs
 IBAN_FILES = {
     'uk': 'iban.txt',
-    'italy': 'iban2.txt',
-    'france': 'iban3.txt'
+    'italy': 'iban3.txt',
+    'france': 'iban2.txt'
 }
 
 # File to store user IDs
